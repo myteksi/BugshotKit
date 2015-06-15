@@ -118,24 +118,24 @@ UIImage *BSKImageWithDrawing(CGSize size, void (^drawingCommands)())
     dispatch_once(&onceToken, ^{
         consoleFontName = nil;
 
-        NSData *inData = [NSData dataWithContentsOfFile:[[NSBundle bundleForClass:[self class]].resourcePath stringByAppendingPathComponent:@"Inconsolata.otf"]];
-        if (inData) {
-            CFErrorRef error;
-            CGDataProviderRef provider = CGDataProviderCreateWithCFData((CFDataRef)inData);
-            CGFontRef font = CGFontCreateWithDataProvider(provider);
-            if (CTFontManagerRegisterGraphicsFont(font, &error)) {
-                if ([UIFont fontWithName:@"Inconsolata" size:size]) consoleFontName = @"Inconsolata";
-                else NSLog(@"[BugshotKit] failed to instantiate console font");
-            } else {
-                CFStringRef errorDescription = CFErrorCopyDescription(error);
-                NSLog(@"[BugshotKit] failed to load console font: %@", errorDescription);
-                CFRelease(errorDescription);
-            }
-            CFRelease(font);
-            CFRelease(provider);
-        } else {
-            NSLog(@"[BugshotKit] Console font not found. Please add Inconsolata.otf to your Resources.");        
-        }
+//        NSData *inData = [NSData dataWithContentsOfFile:[[NSBundle bundleForClass:[self class]].resourcePath stringByAppendingPathComponent:@"Inconsolata.otf"]];
+//        if (inData) {
+//            CFErrorRef error;
+//            CGDataProviderRef provider = CGDataProviderCreateWithCFData((CFDataRef)inData);
+//            CGFontRef font = CGFontCreateWithDataProvider(provider);
+//            if (CTFontManagerRegisterGraphicsFont(font, &error)) {
+//                if ([UIFont fontWithName:@"Inconsolata" size:size]) consoleFontName = @"Inconsolata";
+//                else NSLog(@"[BugshotKit] failed to instantiate console font");
+//            } else {
+//                CFStringRef errorDescription = CFErrorCopyDescription(error);
+//                NSLog(@"[BugshotKit] failed to load console font: %@", errorDescription);
+//                CFRelease(errorDescription);
+//            }
+//            CFRelease(font);
+//            CFRelease(provider);
+//        } else {
+//            NSLog(@"[BugshotKit] Console font not found. Please add Inconsolata.otf to your Resources.");        
+//        }
 
         if (! consoleFontName) consoleFontName = @"CourierNewPSMT";
     });
