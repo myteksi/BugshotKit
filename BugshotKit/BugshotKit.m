@@ -7,6 +7,7 @@
 #import "BSKNavigationController.h"
 #import <asl.h>
 #import "MABGTimer.h"
+#import "BSKScreenshotViewController.h"
 @import CoreText;
 
 //@interface UIViewController ()
@@ -419,8 +420,7 @@ UIImage *BSKImageWithDrawing(CGSize size, void (^drawingCommands)())
     UIViewController *presentingViewController = self.window.rootViewController;
     while (presentingViewController.presentedViewController) presentingViewController = presentingViewController.presentedViewController;
     
-    BSKMainViewController *mvc = [[BSKMainViewController alloc] init];
-    mvc.delegate = self;
+    BSKScreenshotViewController *mvc = [[BSKScreenshotViewController alloc] initWithImage:BugshotKit.sharedManager.snapshotImage annotations:BugshotKit.sharedManager.annotations];
     BSKNavigationController *nc = [[BSKNavigationController alloc] initWithRootViewController:mvc lockedToRotation:self.window.rootViewController.interfaceOrientation];
     self.presentedNavigationController = nc;
     nc.navigationBar.tintColor = BugshotKit.sharedManager.annotationFillColor;
@@ -432,13 +432,13 @@ UIImage *BSKImageWithDrawing(CGSize size, void (^drawingCommands)())
     UIViewController *presentingVC = BugshotKit.sharedManager.presentedNavigationController.presentingViewController;
     if (presentingVC) {
         [presentingVC dismissViewControllerAnimated:animated completion:completion];
-        [BugshotKit.sharedManager mainViewControllerDidClose:nil];
+        [BugshotKit.sharedManager screenshotViewControllerDidClose:nil];
     } else {
         if (completion) completion();
     }
 }
 
-- (void)mainViewControllerDidClose:(BSKMainViewController *)mainViewController
+- (void)screenshotViewControllerDidClose:(BSKScreenshotViewController *)screenshotViewController
 {
     self.isShowing = NO;
     self.snapshotImage = nil;

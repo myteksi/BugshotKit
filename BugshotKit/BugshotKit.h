@@ -3,8 +3,8 @@
 //  Created by Marco Arment on 1/15/14.
 
 #import <UIKit/UIKit.h>
-#import "BSKMainViewController.h"
 #import "BSKWindow.h"
+#import "BSKScreenshotViewController.h"
 
 #if ! DEBUG
 #warning BugshotKit is being included in a non-debug build.
@@ -23,7 +23,7 @@ typedef enum : NSUInteger {
 	BSKInvocationGestureLongPress = (1 << 5),
 } BSKInvocationGestureMask;
 
-@interface BugshotKit : NSObject <UIGestureRecognizerDelegate, BSKMainViewControllerDelegate>
+@interface BugshotKit : NSObject <UIGestureRecognizerDelegate, BSKScreenshotViewControllerDelegate>
 
 /*
     Call this from your UIApplication didFinishLaunching:... method.

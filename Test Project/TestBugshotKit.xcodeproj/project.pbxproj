@@ -24,7 +24,6 @@
 		A9A84754188D8696009C5B78 /* BSKAnnotationView.m in Sources */ = {isa = PBXBuildFile; fileRef = A9A84742188D8696009C5B78 /* BSKAnnotationView.m */; };
 		A9A84755188D8696009C5B78 /* BSKCheckerboardView.m in Sources */ = {isa = PBXBuildFile; fileRef = A9A84744188D8696009C5B78 /* BSKCheckerboardView.m */; };
 		A9A84756188D8696009C5B78 /* BSKLogViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = A9A84746188D8696009C5B78 /* BSKLogViewController.m */; };
-		A9A84757188D8696009C5B78 /* BSKMainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = A9A84748188D8696009C5B78 /* BSKMainViewController.m */; };
 		A9A84758188D8696009C5B78 /* BSKScreenshotViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = A9A8474A188D8696009C5B78 /* BSKScreenshotViewController.m */; };
 		A9A84759188D8696009C5B78 /* BSKToggleButton.m in Sources */ = {isa = PBXBuildFile; fileRef = A9A8474C188D8696009C5B78 /* BSKToggleButton.m */; };
 		A9A8475A188D8696009C5B78 /* BugshotKit.m in Sources */ = {isa = PBXBuildFile; fileRef = A9A8474E188D8696009C5B78 /* BugshotKit.m */; };
@@ -65,8 +64,6 @@
 		A9A84744188D8696009C5B78 /* BSKCheckerboardView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BSKCheckerboardView.m; sourceTree = "<group>"; };
 		A9A84745188D8696009C5B78 /* BSKLogViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BSKLogViewController.h; sourceTree = "<group>"; };
 		A9A84746188D8696009C5B78 /* BSKLogViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BSKLogViewController.m; sourceTree = "<group>"; };
-		A9A84747188D8696009C5B78 /* BSKMainViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BSKMainViewController.h; sourceTree = "<group>"; };
-		A9A84748188D8696009C5B78 /* BSKMainViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BSKMainViewController.m; sourceTree = "<group>"; };
 		A9A84749188D8696009C5B78 /* BSKScreenshotViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BSKScreenshotViewController.h; sourceTree = "<group>"; };
 		A9A8474A188D8696009C5B78 /* BSKScreenshotViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BSKScreenshotViewController.m; sourceTree = "<group>"; };
 		A9A8474B188D8696009C5B78 /* BSKToggleButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BSKToggleButton.h; sourceTree = "<group>"; };
@@ -169,8 +166,6 @@
 				A9A84744188D8696009C5B78 /* BSKCheckerboardView.m */,
 				A9A84745188D8696009C5B78 /* BSKLogViewController.h */,
 				A9A84746188D8696009C5B78 /* BSKLogViewController.m */,
-				A9A84747188D8696009C5B78 /* BSKMainViewController.h */,
-				A9A84748188D8696009C5B78 /* BSKMainViewController.m */,
 				A9A84749188D8696009C5B78 /* BSKScreenshotViewController.h */,
 				A9A8474A188D8696009C5B78 /* BSKScreenshotViewController.m */,
 				A9A8474B188D8696009C5B78 /* BSKToggleButton.h */,
@@ -253,7 +248,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A9A84757188D8696009C5B78 /* BSKMainViewController.m in Sources */,
 				A9A84755188D8696009C5B78 /* BSKCheckerboardView.m in Sources */,
 				A9A8475B188D8696009C5B78 /* UIImage+ImageEffects.m in Sources */,
 				A9595413189329470000850E /* MABGTimer.m in Sources */,
