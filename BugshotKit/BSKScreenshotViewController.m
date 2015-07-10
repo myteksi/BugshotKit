@@ -66,41 +66,24 @@ static UIImage *rotateIfNeeded(UIImage *src);
             [[UIBezierPath bezierPathWithRoundedRect:boxRect cornerRadius:4.0f] stroke];
         });
         
-        CGSize blurIconSize = CGSizeMake(20, 20);
-        UIImage *blurIcon = BSKImageWithDrawing(blurIconSize, ^{
-            [UIColor.blackColor setStroke];
-            [UIColor.blackColor setFill];
-
-            CGRect blurRect = CGRectMake(0, 0, blurIconSize.width, blurIconSize.height);
-            blurRect = CGRectInset(blurRect, 2.5f, 2.5f);
-            
-            [[UIBezierPath bezierPathWithRect:blurRect] stroke];
-            
-            CGRect quarterRect = CGRectMake(blurRect.origin.x, blurRect.origin.y, blurRect.size.width / 2.0f, blurRect.size.height / 2.0f);
-            [[UIBezierPath bezierPathWithRect:quarterRect] fill];
-            quarterRect.origin.x += blurRect.size.width / 2.0f;
-            quarterRect.origin.y += blurRect.size.width / 2.0f;
-            [[UIBezierPath bezierPathWithRect:quarterRect] fill];
-        });
-        
         arrowIcon.accessibilityLabel = @"Arrow";
         boxIcon.accessibilityLabel   = @"Box";
         boxIcon.accessibilityLabel   = @"Blur";
         
-        UISegmentedControl *annotationPicker = [[UISegmentedControl alloc] initWithItems:@[ arrowIcon, boxIcon, blurIcon ]];
-        annotationPicker.accessibilityLabel = @"Drawing tool";
-        annotationPicker.tintColor = BugshotKit.sharedManager.annotationFillColor;
+        NSDictionary *info = [[NSBundle mainBundle] infoDictionary];
         
-        annotationToolChosen = kAnnotationToolArrow;
-        annotationPicker.selectedSegmentIndex = annotationToolChosen;
+        self.navigationItem.prompt = [NSString stringWithFormat:@"Thank you for trying out %@!", [info objectForKey:@"CFBundleDisplayName"]];
         
-        [annotationPicker setWidth:65.0f forSegmentAtIndex:kAnnotationToolArrow];
-        [annotationPicker setWidth:65.0f forSegmentAtIndex:kAnnotationToolBox];
-        [annotationPicker setWidth:65.0f forSegmentAtIndex:kAnnotationToolBlur];
+        UILabel *infoLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 80, 44)];
+        infoLabel.text = @"Drag to draw arrows";
+        infoLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:12.0f];
+        infoLabel.textColor = [UIColor darkGrayColor];
+        infoLabel.numberOfLines = 0;
+        infoLabel.textAlignment = NSTextAlignmentCenter;
         
-        [self annotationPickerPicked:annotationPicker];
-        [annotationPicker addTarget:self action:@selector(annotationPickerPicked:) forControlEvents:UIControlEventValueChanged];
-        self.navigationItem.titleView = annotationPicker;
+        self.navigationItem.titleView = infoLabel;
+        
+        self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"Close" style:UIBarButtonItemStyleBordered target:self action:@selector(cancelButtonTapped:)];
 
         self.contentAreaTapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(contentAreaTapped:)];
     }
@@ -137,6 +120,16 @@ static UIImage *rotateIfNeeded(UIImage *src);
     [view addGestureRecognizer:self.contentAreaTapGestureRecognizer];
     
     self.view = view;
+    self.navigationController.toolbarHidden = NO;
+    
+    // toolbarItems doesn't work ...
+    UIButton *sendButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, 44)];
+    sendButton.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleTopMargin;
+    [sendButton setTitle:@"Send Email" forState:UIControlStateNormal];
+    [sendButton setTitleColor:[UIColor colorWithRed:0.0 green:122.0/255.0 blue:1.0 alpha:1.0] forState:UIControlStateNormal];
+    [sendButton setTitleColor:[UIColor colorWithRed:0.0 green:122.0/255.0 blue:1.0 alpha:0.2] forState:UIControlStateHighlighted];
+    [sendButton addTarget:self action:@selector(sendButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
+    [self.navigationController.toolbar addSubview:sendButton];
 }
 
 - (void)viewWillDisappear:(BOOL)animated
@@ -167,6 +160,7 @@ static UIImage *rotateIfNeeded(UIImage *src);
     if (sender.state == UIGestureRecognizerStateRecognized && ! UIAccessibilityIsVoiceOverRunning()) {
         BOOL hidden = ! self.navigationController.navigationBarHidden;
         [self.navigationController setNavigationBarHidden:hidden animated:YES];
+        [self.navigationController setToolbarHidden:hidden animated:YES];
         [UIView animateWithDuration:UINavigationControllerHideShowBarDuration animations:^{
             self.gridOverlay.alpha = hidden ? 0.0f : kGridOverlayOpacity;
         }];
@@ -177,6 +171,13 @@ static UIImage *rotateIfNeeded(UIImage *src);
 {
     [self.navigationController.presentingViewController dismissViewControllerAnimated:YES completion:^{
         if (self.delegate) [self.delegate screenshotViewControllerDidClose:self];
+    }];
+}
+
+- (void)sendButtonTapped:(id)sender
+{
+    [BugshotKit.sharedManager currentConsoleLogWithDateStamps:YES withCompletion:^(NSString *result) {
+        [self sendButtonTappedWithLog:result];
     }];
 }
 

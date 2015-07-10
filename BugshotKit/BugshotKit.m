@@ -420,11 +420,10 @@ UIImage *BSKImageWithDrawing(CGSize size, void (^drawingCommands)())
     UIViewController *presentingViewController = self.window.rootViewController;
     while (presentingViewController.presentedViewController) presentingViewController = presentingViewController.presentedViewController;
     
-    BSKScreenshotViewController *mvc = [[BSKScreenshotViewController alloc] initWithImage:BugshotKit.sharedManager.snapshotImage annotations:BugshotKit.sharedManager.annotations];
-    BSKNavigationController *nc = [[BSKNavigationController alloc] initWithRootViewController:mvc lockedToRotation:self.window.rootViewController.interfaceOrientation];
+    BSKScreenshotViewController *svc = [[BSKScreenshotViewController alloc] initWithImage:BugshotKit.sharedManager.snapshotImage annotations:BugshotKit.sharedManager.annotations];
+    svc.delegate = self;
+    BSKNavigationController *nc = [[BSKNavigationController alloc] initWithRootViewController:svc lockedToRotation:self.window.rootViewController.interfaceOrientation];
     self.presentedNavigationController = nc;
-    nc.navigationBar.tintColor = BugshotKit.sharedManager.annotationFillColor;
-    nc.navigationBar.titleTextAttributes = @{ NSForegroundColorAttributeName:BugshotKit.sharedManager.annotationFillColor };
     [presentingViewController presentViewController:nc animated:YES completion:NULL];
 }
 
