@@ -15,8 +15,6 @@
 		4C15DA5F188F491000767C78 /* BSKAnnotationView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C15DA47188F491000767C78 /* BSKAnnotationView.m */; };
 		4C15DA61188F491000767C78 /* BSKCheckerboardView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C15DA49188F491000767C78 /* BSKCheckerboardView.m */; };
 		4C15DA63188F491000767C78 /* BSKLogViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C15DA4B188F491000767C78 /* BSKLogViewController.m */; };
-		4C15DA64188F491000767C78 /* BSKMainViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 4C15DA4C188F491000767C78 /* BSKMainViewController.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		4C15DA65188F491000767C78 /* BSKMainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C15DA4D188F491000767C78 /* BSKMainViewController.m */; };
 		4C15DA67188F491000767C78 /* BSKNavigationController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C15DA4F188F491000767C78 /* BSKNavigationController.m */; };
 		4C15DA69188F491000767C78 /* BSKScreenshotViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C15DA51188F491000767C78 /* BSKScreenshotViewController.m */; };
 		4C15DA6B188F491000767C78 /* BSKToggleButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C15DA53188F491000767C78 /* BSKToggleButton.m */; };
@@ -46,8 +44,6 @@
 		4C15DA49188F491000767C78 /* BSKCheckerboardView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BSKCheckerboardView.m; sourceTree = "<group>"; };
 		4C15DA4A188F491000767C78 /* BSKLogViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BSKLogViewController.h; sourceTree = "<group>"; };
 		4C15DA4B188F491000767C78 /* BSKLogViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BSKLogViewController.m; sourceTree = "<group>"; };
-		4C15DA4C188F491000767C78 /* BSKMainViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BSKMainViewController.h; sourceTree = "<group>"; };
-		4C15DA4D188F491000767C78 /* BSKMainViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BSKMainViewController.m; sourceTree = "<group>"; };
 		4C15DA4E188F491000767C78 /* BSKNavigationController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BSKNavigationController.h; sourceTree = "<group>"; };
 		4C15DA4F188F491000767C78 /* BSKNavigationController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BSKNavigationController.m; sourceTree = "<group>"; };
 		4C15DA50188F491000767C78 /* BSKScreenshotViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BSKScreenshotViewController.h; sourceTree = "<group>"; };
@@ -116,8 +112,6 @@
 				4C15DA49188F491000767C78 /* BSKCheckerboardView.m */,
 				4C15DA4A188F491000767C78 /* BSKLogViewController.h */,
 				4C15DA4B188F491000767C78 /* BSKLogViewController.m */,
-				4C15DA4C188F491000767C78 /* BSKMainViewController.h */,
-				4C15DA4D188F491000767C78 /* BSKMainViewController.m */,
 				4C15DA4E188F491000767C78 /* BSKNavigationController.h */,
 				4C15DA4F188F491000767C78 /* BSKNavigationController.m */,
 				4C15DA50188F491000767C78 /* BSKScreenshotViewController.h */,
@@ -152,7 +146,6 @@
 			files = (
 				4C15DA70188F49AB00767C78 /* BugshotKit.h in Headers */,
 				A9AF1AA418995AA90025693B /* MABGTimer.h in Headers */,
-				4C15DA64188F491000767C78 /* BSKMainViewController.h in Headers */,
 				4C15DAA2188F563A00767C78 /* BSKWindow.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -248,7 +241,6 @@
 				4C15DA63188F491000767C78 /* BSKLogViewController.m in Sources */,
 				4C15DA59188F491000767C78 /* BSKAnnotationArrowView.m in Sources */,
 				4C15DA5B188F491000767C78 /* BSKAnnotationBlurView.m in Sources */,
-				4C15DA65188F491000767C78 /* BSKMainViewController.m in Sources */,
 				A9AF1AA518995AA90025693B /* MABGTimer.m in Sources */,
 				4C15DA69188F491000767C78 /* BSKScreenshotViewController.m in Sources */,
 				4C15DA67188F491000767C78 /* BSKNavigationController.m in Sources */,

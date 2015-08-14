@@ -88,15 +88,6 @@ typedef enum : NSUInteger {
  */
 + (void)setDisplayConsoleTextInLogViewer:(BOOL)displayText;
 
-// feel free to mess with these if you want
-
-- (void)currentConsoleLogWithDateStamps:(BOOL)dateStamps
-                         withCompletion:(void (^)(NSString *result))completion;
-- (void)consoleImageWithSize:(CGSize)size
-                    fontSize:(CGFloat)fontSize
-             emptyBottomLine:(BOOL)emptyBottomLine
-              withCompletion:(void (^)(UIImage *result))completion;
-
 
 @property (nonatomic) BOOL displayConsoleTextInLogViewer;
 @property (nonatomic, strong) UIColor *annotationFillColor;

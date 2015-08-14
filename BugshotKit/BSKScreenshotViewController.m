@@ -176,9 +176,50 @@ static UIImage *rotateIfNeeded(UIImage *src);
 
 - (void)sendButtonTapped:(id)sender
 {
-    [BugshotKit.sharedManager currentConsoleLogWithDateStamps:YES withCompletion:^(NSString *result) {
-        [self sendButtonTappedWithLog:result];
-    }];
+    UIImage *screenshot = (BugshotKit.sharedManager.annotatedImage ?: BugshotKit.sharedManager.snapshotImage);
+    
+    NSString *appNameString = [NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleDisplayName"];
+    NSString *appVersionString = [NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleVersion"];
+    
+    size_t size;
+    sysctlbyname("hw.machine", NULL, &size, NULL, 0);
+    char *name = malloc(size);
+    sysctlbyname("hw.machine", name, &size, NULL, 0);
+    NSString *modelIdentifier = [NSString stringWithCString:name encoding:NSUTF8StringEncoding];
+    free(name);
+    
+    NSDictionary *userInfo = @{
+                               @"appName" : appNameString,
+                               @"appVersion" : appVersionString,
+                               @"systemVersion" : UIDevice.currentDevice.systemVersion,
+                               @"deviceModel" : modelIdentifier,
+                               };
+    
+    NSDictionary *extraUserInfo = BugshotKit.sharedManager.extraInfoBlock ? BugshotKit.sharedManager.extraInfoBlock() : nil;
+    if (extraUserInfo) {
+        userInfo = userInfo.mutableCopy;
+        [(NSMutableDictionary *)userInfo addEntriesFromDictionary:extraUserInfo];
+    };
+    
+    NSData *userInfoJSON = [NSJSONSerialization dataWithJSONObject:userInfo options:NSJSONWritingPrettyPrinted error:NULL];
+    
+    MFMailComposeViewController *mf = [MFMailComposeViewController canSendMail] ? [[MFMailComposeViewController alloc] init] : nil;
+    if (! mf) {
+        NSString *msg = [NSString stringWithFormat:@"Mail is not configured on your %@.", UIDevice.currentDevice.localizedModel];
+        [[[UIAlertView alloc] initWithTitle:@"Cannot Send Mail" message:msg delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil] show];
+        return;
+    }
+    
+    mf.toRecipients = [BugshotKit.sharedManager.destinationEmailAddress componentsSeparatedByString:@","];
+    mf.subject = BugshotKit.sharedManager.emailSubjectBlock ? BugshotKit.sharedManager.emailSubjectBlock(userInfo) : [NSString stringWithFormat:@"%@ %@ Feedback", appNameString, appVersionString];
+    [mf setMessageBody:BugshotKit.sharedManager.emailBodyBlock ? BugshotKit.sharedManager.emailBodyBlock(userInfo) : nil isHTML:NO];
+    
+    if (screenshot) [mf addAttachmentData:UIImagePNGRepresentation(rotateIfNeeded(screenshot)) mimeType:@"image/png" fileName:@"screenshot.png"];
+    if (userInfoJSON) [mf addAttachmentData:userInfoJSON mimeType:@"application/json" fileName:@"info.json"];
+    if(BugshotKit.sharedManager.mailComposeCustomizeBlock) BugshotKit.sharedManager.mailComposeCustomizeBlock(mf);
+    
+    mf.mailComposeDelegate = self;
+    [self presentViewController:mf animated:YES completion:NULL];
 }
 
 - (void)annotationPickerPicked:(UISegmentedControl *)sender
@@ -275,56 +316,6 @@ static UIImage *rotateIfNeeded(UIImage *src);
 }
 
 #pragma mark - MFMailCompose
-
-- (void)sendButtonTappedWithLog:(NSString *)log
-{
-    UIImage *screenshot = (BugshotKit.sharedManager.annotatedImage ?: BugshotKit.sharedManager.snapshotImage);
-    if (log && ! log.length) log = nil;
-    
-    NSString *appNameString = [NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleDisplayName"];
-    NSString *appVersionString = [NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleVersion"];
-    
-    size_t size;
-    sysctlbyname("hw.machine", NULL, &size, NULL, 0);
-    char *name = malloc(size);
-    sysctlbyname("hw.machine", name, &size, NULL, 0);
-    NSString *modelIdentifier = [NSString stringWithCString:name encoding:NSUTF8StringEncoding];
-    free(name);
-    
-    NSDictionary *userInfo = @{
-                               @"appName" : appNameString,
-                               @"appVersion" : appVersionString,
-                               @"systemVersion" : UIDevice.currentDevice.systemVersion,
-                               @"deviceModel" : modelIdentifier,
-                               };
-    
-    NSDictionary *extraUserInfo = BugshotKit.sharedManager.extraInfoBlock ? BugshotKit.sharedManager.extraInfoBlock() : nil;
-    if (extraUserInfo) {
-        userInfo = userInfo.mutableCopy;
-        [(NSMutableDictionary *)userInfo addEntriesFromDictionary:extraUserInfo];
-    };
-    
-    NSData *userInfoJSON = [NSJSONSerialization dataWithJSONObject:userInfo options:NSJSONWritingPrettyPrinted error:NULL];
-    
-    MFMailComposeViewController *mf = [MFMailComposeViewController canSendMail] ? [[MFMailComposeViewController alloc] init] : nil;
-    if (! mf) {
-        NSString *msg = [NSString stringWithFormat:@"Mail is not configured on your %@.", UIDevice.currentDevice.localizedModel];
-        [[[UIAlertView alloc] initWithTitle:@"Cannot Send Mail" message:msg delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil] show];
-        return;
-    }
-    
-    mf.toRecipients = [BugshotKit.sharedManager.destinationEmailAddress componentsSeparatedByString:@","];
-    mf.subject = BugshotKit.sharedManager.emailSubjectBlock ? BugshotKit.sharedManager.emailSubjectBlock(userInfo) : [NSString stringWithFormat:@"%@ %@ Feedback", appNameString, appVersionString];
-    [mf setMessageBody:BugshotKit.sharedManager.emailBodyBlock ? BugshotKit.sharedManager.emailBodyBlock(userInfo) : nil isHTML:NO];
-    
-    if (screenshot) [mf addAttachmentData:UIImagePNGRepresentation(rotateIfNeeded(screenshot)) mimeType:@"image/png" fileName:@"screenshot.png"];
-    if (log) [mf addAttachmentData:[log dataUsingEncoding:NSUTF8StringEncoding] mimeType:@"text/plain" fileName:@"log.txt"];
-    if (userInfoJSON) [mf addAttachmentData:userInfoJSON mimeType:@"application/json" fileName:@"info.json"];
-    if(BugshotKit.sharedManager.mailComposeCustomizeBlock) BugshotKit.sharedManager.mailComposeCustomizeBlock(mf);
-    
-    mf.mailComposeDelegate = self;
-    [self presentViewController:mf animated:YES completion:NULL];
-}
 
 - (void)mailComposeController:(MFMailComposeViewController *)controller didFinishWithResult:(MFMailComposeResult)result error:(NSError *)error
 {
