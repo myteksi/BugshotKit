@@ -3,8 +3,8 @@
 //  Created by Marco Arment on 1/15/14.
 
 #import <UIKit/UIKit.h>
-#import "BSKMainViewController.h"
 #import "BSKWindow.h"
+#import "BSKScreenshotViewController.h"
 
 #if ! DEBUG
 #warning BugshotKit is being included in a non-debug build.
@@ -23,7 +23,7 @@ typedef enum : NSUInteger {
 	BSKInvocationGestureLongPress = (1 << 5),
 } BSKInvocationGestureMask;
 
-@interface BugshotKit : NSObject <UIGestureRecognizerDelegate, BSKMainViewControllerDelegate>
+@interface BugshotKit : NSObject <UIGestureRecognizerDelegate, BSKScreenshotViewControllerDelegate>
 
 /*
     Call this from your UIApplication didFinishLaunching:... method.
@@ -87,15 +87,6 @@ typedef enum : NSUInteger {
  @param displayText YES if the console log should be displayed as selectable text. NO if it should use a screenshot.
  */
 + (void)setDisplayConsoleTextInLogViewer:(BOOL)displayText;
-
-// feel free to mess with these if you want
-
-- (void)currentConsoleLogWithDateStamps:(BOOL)dateStamps
-                         withCompletion:(void (^)(NSString *result))completion;
-- (void)consoleImageWithSize:(CGSize)size
-                    fontSize:(CGFloat)fontSize
-             emptyBottomLine:(BOOL)emptyBottomLine
-              withCompletion:(void (^)(UIImage *result))completion;
 
 
 @property (nonatomic) BOOL displayConsoleTextInLogViewer;

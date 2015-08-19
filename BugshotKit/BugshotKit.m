@@ -7,11 +7,12 @@
 #import "BSKNavigationController.h"
 #import <asl.h>
 #import "MABGTimer.h"
+#import "BSKScreenshotViewController.h"
 @import CoreText;
 
-@interface UIViewController ()
-- (void)attentionClassDumpUser:(id)fp8 yesItsUsAgain:(id)fp12 althoughSwizzlingAndOverridingPrivateMethodsIsFun:(id)fp16 itWasntMuchFunWhenYourAppStoppedWorking:(id)fp20 pleaseRefrainFromDoingSoInTheFutureOkayThanksBye:(id)fp24;
-@end
+//@interface UIViewController ()
+//- (void)attentionClassDumpUser:(id)fp8 yesItsUsAgain:(id)fp12 althoughSwizzlingAndOverridingPrivateMethodsIsFun:(id)fp16 itWasntMuchFunWhenYourAppStoppedWorking:(id)fp20 pleaseRefrainFromDoingSoInTheFutureOkayThanksBye:(id)fp24;
+//@end
 
 NSString * const BSKNewLogMessageNotification = @"BSKNewLogMessageNotification";
 
@@ -118,24 +119,24 @@ UIImage *BSKImageWithDrawing(CGSize size, void (^drawingCommands)())
     dispatch_once(&onceToken, ^{
         consoleFontName = nil;
 
-        NSData *inData = [NSData dataWithContentsOfFile:[[NSBundle bundleForClass:[self class]].resourcePath stringByAppendingPathComponent:@"Inconsolata.otf"]];
-        if (inData) {
-            CFErrorRef error;
-            CGDataProviderRef provider = CGDataProviderCreateWithCFData((CFDataRef)inData);
-            CGFontRef font = CGFontCreateWithDataProvider(provider);
-            if (CTFontManagerRegisterGraphicsFont(font, &error)) {
-                if ([UIFont fontWithName:@"Inconsolata" size:size]) consoleFontName = @"Inconsolata";
-                else NSLog(@"[BugshotKit] failed to instantiate console font");
-            } else {
-                CFStringRef errorDescription = CFErrorCopyDescription(error);
-                NSLog(@"[BugshotKit] failed to load console font: %@", errorDescription);
-                CFRelease(errorDescription);
-            }
-            CFRelease(font);
-            CFRelease(provider);
-        } else {
-            NSLog(@"[BugshotKit] Console font not found. Please add Inconsolata.otf to your Resources.");        
-        }
+//        NSData *inData = [NSData dataWithContentsOfFile:[[NSBundle bundleForClass:[self class]].resourcePath stringByAppendingPathComponent:@"Inconsolata.otf"]];
+//        if (inData) {
+//            CFErrorRef error;
+//            CGDataProviderRef provider = CGDataProviderCreateWithCFData((CFDataRef)inData);
+//            CGFontRef font = CGFontCreateWithDataProvider(provider);
+//            if (CTFontManagerRegisterGraphicsFont(font, &error)) {
+//                if ([UIFont fontWithName:@"Inconsolata" size:size]) consoleFontName = @"Inconsolata";
+//                else NSLog(@"[BugshotKit] failed to instantiate console font");
+//            } else {
+//                CFStringRef errorDescription = CFErrorCopyDescription(error);
+//                NSLog(@"[BugshotKit] failed to load console font: %@", errorDescription);
+//                CFRelease(errorDescription);
+//            }
+//            CFRelease(font);
+//            CFRelease(provider);
+//        } else {
+//            NSLog(@"[BugshotKit] Console font not found. Please add Inconsolata.otf to your Resources.");        
+//        }
 
         if (! consoleFontName) consoleFontName = @"CourierNewPSMT";
     });
@@ -146,11 +147,11 @@ UIImage *BSKImageWithDrawing(CGSize size, void (^drawingCommands)())
 - (instancetype)init
 {
     if ( (self = [super init]) ) {
-        if ([self.class isProbablyAppStoreBuild]) {
-            self.isDisabled = YES;
-            NSLog(@"[BugshotKit] App Store build detected. BugshotKit is disabled.");
-            return self;
-        }
+//        if ([self.class isProbablyAppStoreBuild]) {
+//            self.isDisabled = YES;
+//            NSLog(@"[BugshotKit] App Store build detected. BugshotKit is disabled.");
+//            return self;
+//        }
         
         self.windowsWithGesturesAttached = [NSMapTable weakToWeakObjectsMapTable];
         
@@ -211,14 +212,14 @@ UIImage *BSKImageWithDrawing(CGSize size, void (^drawingCommands)())
 
     // The purpose of this is to immediately get rejected from App Store submissions in case you accidentally submit an app with BugshotKit.
     // BugshotKit is only meant to be used during development and beta testing. Do not ship it in App Store builds.
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wundeclared-selector"
-    if ([UIEvent.class instancesRespondToSelector:@selector(_gsEvent)] &&
-        [UIViewController.class instancesRespondToSelector:@selector(attentionClassDumpUser:yesItsUsAgain:althoughSwizzlingAndOverridingPrivateMethodsIsFun:itWasntMuchFunWhenYourAppStoppedWorking:pleaseRefrainFromDoingSoInTheFutureOkayThanksBye:)]) {
-        // I can't believe I actually had a reason to call this method.
-        [self.window.rootViewController attentionClassDumpUser:nil yesItsUsAgain:nil althoughSwizzlingAndOverridingPrivateMethodsIsFun:nil itWasntMuchFunWhenYourAppStoppedWorking:nil pleaseRefrainFromDoingSoInTheFutureOkayThanksBye:nil];
-    }
-#pragma clang diagnostic pop
+//#pragma clang diagnostic push
+//#pragma clang diagnostic ignored "-Wundeclared-selector"
+//    if ([UIEvent.class instancesRespondToSelector:@selector(_gsEvent)] &&
+//        [UIViewController.class instancesRespondToSelector:@selector(attentionClassDumpUser:yesItsUsAgain:althoughSwizzlingAndOverridingPrivateMethodsIsFun:itWasntMuchFunWhenYourAppStoppedWorking:pleaseRefrainFromDoingSoInTheFutureOkayThanksBye:)]) {
+//        // I can't believe I actually had a reason to call this method.
+//        [self.window.rootViewController attentionClassDumpUser:nil yesItsUsAgain:nil althoughSwizzlingAndOverridingPrivateMethodsIsFun:nil itWasntMuchFunWhenYourAppStoppedWorking:nil pleaseRefrainFromDoingSoInTheFutureOkayThanksBye:nil];
+//    }
+//#pragma clang diagnostic pop
 }
 
 - (void)newWindowDidBecomeVisible:(NSNotification *)n
@@ -419,12 +420,10 @@ UIImage *BSKImageWithDrawing(CGSize size, void (^drawingCommands)())
     UIViewController *presentingViewController = self.window.rootViewController;
     while (presentingViewController.presentedViewController) presentingViewController = presentingViewController.presentedViewController;
     
-    BSKMainViewController *mvc = [[BSKMainViewController alloc] init];
-    mvc.delegate = self;
-    BSKNavigationController *nc = [[BSKNavigationController alloc] initWithRootViewController:mvc lockedToRotation:self.window.rootViewController.interfaceOrientation];
+    BSKScreenshotViewController *svc = [[BSKScreenshotViewController alloc] initWithImage:BugshotKit.sharedManager.snapshotImage annotations:BugshotKit.sharedManager.annotations];
+    svc.delegate = self;
+    BSKNavigationController *nc = [[BSKNavigationController alloc] initWithRootViewController:svc lockedToRotation:self.window.rootViewController.interfaceOrientation];
     self.presentedNavigationController = nc;
-    nc.navigationBar.tintColor = BugshotKit.sharedManager.annotationFillColor;
-    nc.navigationBar.titleTextAttributes = @{ NSForegroundColorAttributeName:BugshotKit.sharedManager.annotationFillColor };
     [presentingViewController presentViewController:nc animated:YES completion:NULL];
 }
 
@@ -432,44 +431,18 @@ UIImage *BSKImageWithDrawing(CGSize size, void (^drawingCommands)())
     UIViewController *presentingVC = BugshotKit.sharedManager.presentedNavigationController.presentingViewController;
     if (presentingVC) {
         [presentingVC dismissViewControllerAnimated:animated completion:completion];
-        [BugshotKit.sharedManager mainViewControllerDidClose:nil];
+        [BugshotKit.sharedManager screenshotViewControllerDidClose:nil];
     } else {
         if (completion) completion();
     }
 }
 
-- (void)mainViewControllerDidClose:(BSKMainViewController *)mainViewController
+- (void)screenshotViewControllerDidClose:(BSKScreenshotViewController *)screenshotViewController
 {
     self.isShowing = NO;
     self.snapshotImage = nil;
     self.annotatedImage = nil;
     self.annotations = nil;
-}
-
-#pragma mark - Console logging
-
-- (void)currentConsoleLogWithDateStamps:(BOOL)dateStamps
-                         withCompletion:(void (^)(NSString *result))completion
-{
-    dispatch_async(self.logQueue, ^{
-        NSMutableString *string = [NSMutableString string];
-
-        char fdate[24];
-        for (BSKLogMessage *msg in self.consoleMessages) {
-            if (dateStamps) {
-                time_t timestamp = (time_t) msg.timestamp;
-                struct tm *lt = localtime(&timestamp);
-                strftime(fdate, 24, "%Y-%m-%d %T", lt);
-                [string appendFormat:@"%s.%03d %@\n", fdate, (int) (1000.0 * (msg.timestamp - floor(msg.timestamp))), msg.message];
-            } else {
-                [string appendFormat:@"%@\n", msg.message];
-            }
-        }
-
-        dispatch_async(dispatch_get_main_queue(), ^{
-            completion(string);
-        });
-    });
 }
 
 - (void)clearLog
@@ -567,51 +540,6 @@ asl_object_t SystemSafeASLNext(asl_object_t r) {
     asl_free(q);
 
     return foundNewEntries;
-}
-
-- (void)consoleImageWithSize:(CGSize)size
-                    fontSize:(CGFloat)fontSize
-             emptyBottomLine:(BOOL)emptyBottomLine
-              withCompletion:(void (^)(UIImage *result))completion
-{
-    [self currentConsoleLogWithDateStamps:NO withCompletion:^(NSString *consoleText) {
-        NSUInteger characterLimit = (NSUInteger) ((size.width / (fontSize / 2.0f)) * (size.height / fontSize));
-        if (consoleText.length > characterLimit) consoleText = [consoleText substringFromIndex:(consoleText.length - characterLimit)];
-
-        NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
-        paragraphStyle.lineBreakMode = NSLineBreakByWordWrapping;
-        paragraphStyle.alignment = NSTextAlignmentLeft;
-
-        NSDictionary *attributes = @{
-                                     NSFontAttributeName : [BugshotKit consoleFontWithSize:fontSize],
-                                     NSForegroundColorAttributeName : UIColor.blackColor,
-                                     NSParagraphStyleAttributeName : paragraphStyle,
-                                     };
-
-        NSMutableAttributedString *attrString = [[NSMutableAttributedString alloc] initWithString:consoleText attributes:attributes];
-
-        NSStringDrawingContext *stringDrawingContext = [NSStringDrawingContext new];
-        stringDrawingContext.minimumScaleFactor = 1.0;
-
-        NSStringDrawingOptions options = (NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingTruncatesLastVisibleLine | NSStringDrawingUsesFontLeading);
-
-        CGFloat padding = 2.0f;
-        CGSize renderSize = CGSizeMake(size.width - padding * 2.0f, size.height - padding * 2.0f);
-        if (emptyBottomLine) renderSize.height -= fontSize;
-
-        completion(BSKImageWithDrawing(size, ^{
-            [UIColor.whiteColor setFill];
-            [[UIBezierPath bezierPathWithRect:CGRectMake(0, 0, size.width, size.height)] fill];
-
-            CGRect stringRect = [attrString boundingRectWithSize:CGSizeMake(renderSize.width, MAXFLOAT) options:options context:stringDrawingContext];
-
-            stringRect.origin = CGPointMake(padding, padding);
-            if (stringRect.size.height < renderSize.height) stringRect.size.height = renderSize.height;
-            else stringRect.origin.y -= (stringRect.size.height - renderSize.height);
-
-            [attrString drawWithRect:stringRect options:options context:stringDrawingContext];
-        }));
-    }];
 }
 
 #pragma mark - App Store build detection

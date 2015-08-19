@@ -19,7 +19,6 @@ static int markerNumber = 0;
     if ( (self = [super init]) ) {
         self.title = @"Debug Log";
         self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(addMarkerButtonTapped:)];
-        [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(updateLiveLog:) name:BSKNewLogMessageNotification object:nil];
     }
     return self;
 }
@@ -37,13 +36,6 @@ static int markerNumber = 0;
     UIView *console = ([BugshotKit.sharedManager displayConsoleTextInLogViewer] ? self.consoleTextView : self.consoleView);
     [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|[c]|" options:0 metrics:nil views:@{ @"c" : console }]];
     [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[top][c]|" options:0 metrics:nil views:@{ @"c" : console, @"top" : self.topLayoutGuide }]];
-
-    dispatch_async(dispatch_get_main_queue(), ^{ [self updateLiveLog:nil]; });
-}
-
-- (void)dealloc
-{
-    [NSNotificationCenter.defaultCenter removeObserver:self name:BSKNewLogMessageNotification object:nil];
 }
 
 - (void)loadView
@@ -70,24 +62,5 @@ static int markerNumber = 0;
 
     self.view = view;
 }
-
-- (void)updateLiveLog:(NSNotification *)n
-{
-    if (! self.isViewLoaded) return;
-
-    if ([BugshotKit.sharedManager displayConsoleTextInLogViewer]) {
-        [BugshotKit.sharedManager currentConsoleLogWithDateStamps:YES
-                                                   withCompletion:^(NSString *result) {
-                                                       self.consoleTextView.text = result;
-                                                       [self.consoleTextView scrollRangeToVisible:NSMakeRange([result length], 0)];
-                                                   }];
-    }
-    else {
-        [BugshotKit.sharedManager consoleImageWithSize:self.consoleView.bounds.size fontSize:(UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? 13.0f : 9.0f) emptyBottomLine:YES withCompletion:^(UIImage *image) {
-            self.consoleView.image = image;
-        }];
-    }
-}
-
 
 @end

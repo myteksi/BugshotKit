@@ -9,6 +9,7 @@
 #import "BSKAnnotationBlurView.h"
 #import <QuartzCore/QuartzCore.h>
 #import "BSKCheckerboardView.h"
+#include <sys/sysctl.h>
 
 #define kAnnotationToolArrow 0
 #define kAnnotationToolBox   1
@@ -18,6 +19,7 @@
 
 #define kGridOverlayOpacity 0.2f
 
+static UIImage *rotateIfNeeded(UIImage *src);
 
 @interface BSKScreenshotViewController () {
     BSKAnnotationView *annotationInProgress;
@@ -64,41 +66,24 @@
             [[UIBezierPath bezierPathWithRoundedRect:boxRect cornerRadius:4.0f] stroke];
         });
         
-        CGSize blurIconSize = CGSizeMake(20, 20);
-        UIImage *blurIcon = BSKImageWithDrawing(blurIconSize, ^{
-            [UIColor.blackColor setStroke];
-            [UIColor.blackColor setFill];
-
-            CGRect blurRect = CGRectMake(0, 0, blurIconSize.width, blurIconSize.height);
-            blurRect = CGRectInset(blurRect, 2.5f, 2.5f);
-            
-            [[UIBezierPath bezierPathWithRect:blurRect] stroke];
-            
-            CGRect quarterRect = CGRectMake(blurRect.origin.x, blurRect.origin.y, blurRect.size.width / 2.0f, blurRect.size.height / 2.0f);
-            [[UIBezierPath bezierPathWithRect:quarterRect] fill];
-            quarterRect.origin.x += blurRect.size.width / 2.0f;
-            quarterRect.origin.y += blurRect.size.width / 2.0f;
-            [[UIBezierPath bezierPathWithRect:quarterRect] fill];
-        });
-        
         arrowIcon.accessibilityLabel = @"Arrow";
         boxIcon.accessibilityLabel   = @"Box";
         boxIcon.accessibilityLabel   = @"Blur";
         
-        UISegmentedControl *annotationPicker = [[UISegmentedControl alloc] initWithItems:@[ arrowIcon, boxIcon, blurIcon ]];
-        annotationPicker.accessibilityLabel = @"Drawing tool";
-        annotationPicker.tintColor = BugshotKit.sharedManager.annotationFillColor;
+        NSDictionary *info = [[NSBundle mainBundle] infoDictionary];
         
-        annotationToolChosen = kAnnotationToolArrow;
-        annotationPicker.selectedSegmentIndex = annotationToolChosen;
+        self.navigationItem.prompt = [NSString stringWithFormat:@"Thank you for trying out %@!", [info objectForKey:@"CFBundleDisplayName"]];
         
-        [annotationPicker setWidth:65.0f forSegmentAtIndex:kAnnotationToolArrow];
-        [annotationPicker setWidth:65.0f forSegmentAtIndex:kAnnotationToolBox];
-        [annotationPicker setWidth:65.0f forSegmentAtIndex:kAnnotationToolBlur];
+        UILabel *infoLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 80, 44)];
+        infoLabel.text = @"Drag to draw arrows";
+        infoLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:12.0f];
+        infoLabel.textColor = [UIColor darkGrayColor];
+        infoLabel.numberOfLines = 0;
+        infoLabel.textAlignment = NSTextAlignmentCenter;
         
-        [self annotationPickerPicked:annotationPicker];
-        [annotationPicker addTarget:self action:@selector(annotationPickerPicked:) forControlEvents:UIControlEventValueChanged];
-        self.navigationItem.titleView = annotationPicker;
+        self.navigationItem.titleView = infoLabel;
+        
+        self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"Close" style:UIBarButtonItemStyleBordered target:self action:@selector(cancelButtonTapped:)];
 
         self.contentAreaTapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(contentAreaTapped:)];
     }
@@ -135,29 +120,16 @@
     [view addGestureRecognizer:self.contentAreaTapGestureRecognizer];
     
     self.view = view;
-}
-
-- (void)viewWillDisappear:(BOOL)animated
-{
-    self.gridOverlay.hidden = YES;
-
-    UIGraphicsBeginImageContextWithOptions(self.view.bounds.size, YES, UIScreen.mainScreen.scale);
-    // [self.view drawViewHierarchyInRect:self.view.bounds afterScreenUpdates:YES]; // doesn't work to hide the overlay; I guess I need renderInContext:. Ugh.
-    [self.view.layer renderInContext:UIGraphicsGetCurrentContext()];
-    UIImage *annotatedImage = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-
-    self.gridOverlay.hidden = NO;
-
-    NSMutableArray *savedAnnotations = [NSMutableArray array];
-    for (UIView *annotation in self.view.subviews) {
-        if ([annotation isKindOfClass:BSKAnnotationView.class]) [savedAnnotations addObject:annotation];
-    }
-
-    BugshotKit.sharedManager.annotations = savedAnnotations;
-    BugshotKit.sharedManager.annotatedImage = annotatedImage;
-
-    [super viewWillDisappear:animated];    
+    self.navigationController.toolbarHidden = NO;
+    
+    // toolbarItems doesn't work ...
+    UIButton *sendButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, 44)];
+    sendButton.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleTopMargin;
+    [sendButton setTitle:@"Send Email" forState:UIControlStateNormal];
+    [sendButton setTitleColor:[UIColor colorWithRed:0.0 green:122.0/255.0 blue:1.0 alpha:1.0] forState:UIControlStateNormal];
+    [sendButton setTitleColor:[UIColor colorWithRed:0.0 green:122.0/255.0 blue:1.0 alpha:0.2] forState:UIControlStateHighlighted];
+    [sendButton addTarget:self action:@selector(sendButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
+    [self.navigationController.toolbar addSubview:sendButton];
 }
 
 - (void)contentAreaTapped:(UITapGestureRecognizer *)sender
@@ -165,10 +137,88 @@
     if (sender.state == UIGestureRecognizerStateRecognized && ! UIAccessibilityIsVoiceOverRunning()) {
         BOOL hidden = ! self.navigationController.navigationBarHidden;
         [self.navigationController setNavigationBarHidden:hidden animated:YES];
+        [self.navigationController setToolbarHidden:hidden animated:YES];
         [UIView animateWithDuration:UINavigationControllerHideShowBarDuration animations:^{
             self.gridOverlay.alpha = hidden ? 0.0f : kGridOverlayOpacity;
         }];
     }
+}
+
+- (void)cancelButtonTapped:(id)sender
+{
+    [self.navigationController.presentingViewController dismissViewControllerAnimated:YES completion:^{
+        if (self.delegate) [self.delegate screenshotViewControllerDidClose:self];
+    }];
+}
+
+- (void)sendButtonTapped:(UIButton *)sender
+{
+    sender.enabled = NO;
+    
+    self.gridOverlay.hidden = YES;
+    
+    UIGraphicsBeginImageContextWithOptions(self.view.bounds.size, YES, UIScreen.mainScreen.scale);
+    // [self.view drawViewHierarchyInRect:self.view.bounds afterScreenUpdates:YES]; // doesn't work to hide the overlay; I guess I need renderInContext:. Ugh.
+    [self.view.layer renderInContext:UIGraphicsGetCurrentContext()];
+    UIImage *annotatedImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    
+    self.gridOverlay.hidden = NO;
+    
+    NSMutableArray *savedAnnotations = [NSMutableArray array];
+    for (UIView *annotation in self.view.subviews) {
+        if ([annotation isKindOfClass:BSKAnnotationView.class]) [savedAnnotations addObject:annotation];
+    }
+    
+    BugshotKit.sharedManager.annotations = savedAnnotations;
+    BugshotKit.sharedManager.annotatedImage = annotatedImage;
+    
+    UIImage *screenshot = (BugshotKit.sharedManager.annotatedImage ?: BugshotKit.sharedManager.snapshotImage);
+    
+    NSString *appNameString = [NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleDisplayName"];
+    NSString *appVersionString = [NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleVersion"];
+    
+    size_t size;
+    sysctlbyname("hw.machine", NULL, &size, NULL, 0);
+    char *name = malloc(size);
+    sysctlbyname("hw.machine", name, &size, NULL, 0);
+    NSString *modelIdentifier = [NSString stringWithCString:name encoding:NSUTF8StringEncoding];
+    free(name);
+    
+    NSDictionary *userInfo = @{
+                               @"appName" : appNameString,
+                               @"appVersion" : appVersionString,
+                               @"systemVersion" : UIDevice.currentDevice.systemVersion,
+                               @"deviceModel" : modelIdentifier,
+                               };
+    
+    NSDictionary *extraUserInfo = BugshotKit.sharedManager.extraInfoBlock ? BugshotKit.sharedManager.extraInfoBlock() : nil;
+    if (extraUserInfo) {
+        userInfo = userInfo.mutableCopy;
+        [(NSMutableDictionary *)userInfo addEntriesFromDictionary:extraUserInfo];
+    };
+    
+    NSData *userInfoJSON = [NSJSONSerialization dataWithJSONObject:userInfo options:NSJSONWritingPrettyPrinted error:NULL];
+    
+    MFMailComposeViewController *mf = [MFMailComposeViewController canSendMail] ? [[MFMailComposeViewController alloc] init] : nil;
+    if (! mf) {
+        NSString *msg = [NSString stringWithFormat:@"Mail is not configured on your %@.", UIDevice.currentDevice.localizedModel];
+        [[[UIAlertView alloc] initWithTitle:@"Cannot Send Mail" message:msg delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil] show];
+        return;
+    }
+    
+    mf.toRecipients = [BugshotKit.sharedManager.destinationEmailAddress componentsSeparatedByString:@","];
+    mf.subject = BugshotKit.sharedManager.emailSubjectBlock ? BugshotKit.sharedManager.emailSubjectBlock(userInfo) : [NSString stringWithFormat:@"%@ %@ Feedback", appNameString, appVersionString];
+    [mf setMessageBody:BugshotKit.sharedManager.emailBodyBlock ? BugshotKit.sharedManager.emailBodyBlock(userInfo) : nil isHTML:NO];
+    
+    if (screenshot) [mf addAttachmentData:UIImagePNGRepresentation(rotateIfNeeded(screenshot)) mimeType:@"image/png" fileName:@"screenshot.png"];
+    if (userInfoJSON) [mf addAttachmentData:userInfoJSON mimeType:@"application/json" fileName:@"info.json"];
+    if(BugshotKit.sharedManager.mailComposeCustomizeBlock) BugshotKit.sharedManager.mailComposeCustomizeBlock(mf);
+    
+    mf.mailComposeDelegate = self;
+    [self presentViewController:mf animated:YES completion:^{
+        sender.enabled = YES;
+    }];
 }
 
 - (void)annotationPickerPicked:(UISegmentedControl *)sender
@@ -261,6 +311,31 @@
     if (annotationInProgress) {
         [annotationInProgress removeFromSuperview];
         annotationInProgress = nil;
+    }
+}
+
+#pragma mark - MFMailCompose
+
+- (void)mailComposeController:(MFMailComposeViewController *)controller didFinishWithResult:(MFMailComposeResult)result error:(NSError *)error
+{
+    [self dismissViewControllerAnimated:YES completion:^{
+        if (result == MFMailComposeResultSaved || result == MFMailComposeResultSent) [self cancelButtonTapped:nil];
+    }];
+}
+
+// By Matteo Gavagnin on 21/01/14.
+static UIImage *rotateIfNeeded(UIImage *src)
+{
+    if (src.imageOrientation == UIImageOrientationDown && src.size.width < src.size.height) {
+        UIGraphicsBeginImageContext(src.size);
+        [src drawAtPoint:CGPointMake(0, 0)];
+        return UIGraphicsGetImageFromCurrentImageContext();
+    } else if ((src.imageOrientation == UIImageOrientationLeft || src.imageOrientation == UIImageOrientationRight) && src.size.width > src.size.height) {
+        UIGraphicsBeginImageContext(src.size);
+        [src drawAtPoint:CGPointMake(0, 0)];
+        return UIGraphicsGetImageFromCurrentImageContext();
+    } else {
+        return src;
     }
 }
 
