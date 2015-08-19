@@ -132,29 +132,6 @@ static UIImage *rotateIfNeeded(UIImage *src);
     [self.navigationController.toolbar addSubview:sendButton];
 }
 
-- (void)viewWillDisappear:(BOOL)animated
-{
-    self.gridOverlay.hidden = YES;
-
-    UIGraphicsBeginImageContextWithOptions(self.view.bounds.size, YES, UIScreen.mainScreen.scale);
-    // [self.view drawViewHierarchyInRect:self.view.bounds afterScreenUpdates:YES]; // doesn't work to hide the overlay; I guess I need renderInContext:. Ugh.
-    [self.view.layer renderInContext:UIGraphicsGetCurrentContext()];
-    UIImage *annotatedImage = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-
-    self.gridOverlay.hidden = NO;
-
-    NSMutableArray *savedAnnotations = [NSMutableArray array];
-    for (UIView *annotation in self.view.subviews) {
-        if ([annotation isKindOfClass:BSKAnnotationView.class]) [savedAnnotations addObject:annotation];
-    }
-
-    BugshotKit.sharedManager.annotations = savedAnnotations;
-    BugshotKit.sharedManager.annotatedImage = annotatedImage;
-
-    [super viewWillDisappear:animated];    
-}
-
 - (void)contentAreaTapped:(UITapGestureRecognizer *)sender
 {
     if (sender.state == UIGestureRecognizerStateRecognized && ! UIAccessibilityIsVoiceOverRunning()) {
@@ -174,8 +151,28 @@ static UIImage *rotateIfNeeded(UIImage *src);
     }];
 }
 
-- (void)sendButtonTapped:(id)sender
+- (void)sendButtonTapped:(UIButton *)sender
 {
+    sender.enabled = NO;
+    
+    self.gridOverlay.hidden = YES;
+    
+    UIGraphicsBeginImageContextWithOptions(self.view.bounds.size, YES, UIScreen.mainScreen.scale);
+    // [self.view drawViewHierarchyInRect:self.view.bounds afterScreenUpdates:YES]; // doesn't work to hide the overlay; I guess I need renderInContext:. Ugh.
+    [self.view.layer renderInContext:UIGraphicsGetCurrentContext()];
+    UIImage *annotatedImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    
+    self.gridOverlay.hidden = NO;
+    
+    NSMutableArray *savedAnnotations = [NSMutableArray array];
+    for (UIView *annotation in self.view.subviews) {
+        if ([annotation isKindOfClass:BSKAnnotationView.class]) [savedAnnotations addObject:annotation];
+    }
+    
+    BugshotKit.sharedManager.annotations = savedAnnotations;
+    BugshotKit.sharedManager.annotatedImage = annotatedImage;
+    
     UIImage *screenshot = (BugshotKit.sharedManager.annotatedImage ?: BugshotKit.sharedManager.snapshotImage);
     
     NSString *appNameString = [NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleDisplayName"];
@@ -219,7 +216,9 @@ static UIImage *rotateIfNeeded(UIImage *src);
     if(BugshotKit.sharedManager.mailComposeCustomizeBlock) BugshotKit.sharedManager.mailComposeCustomizeBlock(mf);
     
     mf.mailComposeDelegate = self;
-    [self presentViewController:mf animated:YES completion:NULL];
+    [self presentViewController:mf animated:YES completion:^{
+        sender.enabled = YES;
+    }];
 }
 
 - (void)annotationPickerPicked:(UISegmentedControl *)sender
